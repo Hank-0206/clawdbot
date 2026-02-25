@@ -172,51 +172,31 @@ export class OpenCodeProvider implements AIProvider {
 export class MiniMaxProvider implements AIProvider {
   name = 'MiniMax';
   type: AIProviderType = 'minimax';
-  private apiKey: string;
-  private baseUrl: string;
-  private groupId: string;
+  private client: OpenAI;
 
   constructor(config: AgentConfig) {
-    this.apiKey = config.apiKey || process.env.MINIMAX_API_KEY || '';
-    this.baseUrl = config.baseUrl || process.env.MINIMAX_BASE_URL || 'https://api.minimax.chat/v1';
-    this.groupId = config.groupId || process.env.MINIMAX_GROUP_ID || '';
+    this.client = new OpenAI({
+      apiKey: config.apiKey || process.env.MINIMAX_API_KEY || '',
+      baseURL: config.baseUrl || process.env.MINIMAX_BASE_URL || 'https://api.minimax.chat/v1',
+    });
   }
 
   async chat(messages: AIMessage[], options: Record<string, any> = {}): Promise<AIResponse> {
     const model = options.model || 'MiniMax-M2.5';
-    const groupId = options.groupId || this.groupId;
 
-    // Convert messages to MiniMax format
-    const mmMessages = messages.map(m => ({
-      role: m.role === 'system' ? 'system' : m.role,
-      content: m.content,
-    }));
-
-    const response = await fetch(`${this.baseUrl}/text/chatcompletion_v2?GroupId=${groupId}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: mmMessages,
-        max_tokens: options.maxTokens || 4096,
-        temperature: options.temperature || 1,
-      }),
+    const response = await this.client.chat.completions.create({
+      model: model,
+      messages: messages as any,
+      max_tokens: options.maxTokens || 4096,
+      temperature: options.temperature || 1,
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`MiniMax API error: ${error}`);
-    }
-
-    const data = await response.json() as any;
+    const choice = response.choices[0];
     return {
-      content: data.choices?.[0]?.message?.content || '',
+      content: choice.message.content || '',
       usage: {
-        inputTokens: data.usage?.prompt_tokens || 0,
-        outputTokens: data.usage?.completion_tokens || 0,
+        inputTokens: response.usage?.prompt_tokens || 0,
+        outputTokens: response.usage?.completion_tokens || 0,
       },
     };
   }
