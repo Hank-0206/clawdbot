@@ -6,6 +6,7 @@ import { Message, PlatformType } from '../types/index.js';
 /**
  * Telegram Platform Adapter
  * Supports receiving and sending messages via Telegram Bot API
+ * Supports both Webhook and Long Polling modes
  */
 export class TelegramAdapter extends BasePlatformAdapter {
   name = 'Telegram';
@@ -13,10 +14,15 @@ export class TelegramAdapter extends BasePlatformAdapter {
 
   private botToken: string = '';
   private apiBaseUrl: string = '';
+  private pollingOffset: number = 0;
+  private pollingTimeout: number = 30;  // Long polling timeout in seconds
+  private pollingInterval: NodeJS.Timeout | null = null;
+  private mode: 'webhook' | 'polling' = 'webhook';
 
   async initialize(config: Record<string, any>): Promise<void> {
     this.botToken = config.botToken || process.env.TELEGRAM_BOT_TOKEN || '';
     this.apiBaseUrl = `https://api.telegram.org/bot${this.botToken}`;
+    this.mode = config.mode || process.env.TELEGRAM_MODE as 'webhook' | 'polling' || 'webhook';
 
     if (!this.botToken) {
       throw new Error('Telegram botToken is required');
@@ -33,12 +39,126 @@ export class TelegramAdapter extends BasePlatformAdapter {
       throw error;
     }
 
+    // Start based on mode
+    if (this.mode === 'polling') {
+      await this.startPolling();
+    } else {
+      console.log(`[Telegram] Running in webhook mode - waiting for incoming requests`);
+    }
+
     this.running = true;
-    console.log(`[Telegram] Adapter started`);
+    console.log(`[Telegram] Adapter started (${this.mode} mode)`);
   }
 
+  /**
+   * Start Long Polling mode
+   */
+  private async startPolling(): Promise<void> {
+    console.log(`[Telegram] Starting Long Polling...`);
+
+    const poll = async () => {
+      if (!this.running) return;
+
+      try {
+        const response = await axios.post(
+          `${this.apiBaseUrl}/getUpdates`,
+          {
+            offset: this.pollingOffset + 1,
+            timeout: this.pollingTimeout,
+          },
+          {
+            timeout: (this.pollingTimeout + 10) * 1000,  // Add extra timeout
+          }
+        );
+
+        const updates = response.data.result;
+
+        if (updates && updates.length > 0) {
+          for (const update of updates) {
+            this.pollingOffset = update.update_id;
+
+            // Process the update
+            const message = this.processUpdate(update);
+            if (message && this.messageHandler) {
+              this.messageHandler(message);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (this.running) {
+          console.error(`[Telegram] Polling error:`, error.message);
+          // Wait a bit before retrying on error
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+      }
+
+      // Continue polling if still running
+      if (this.running) {
+        setImmediate(poll);
+      }
+    };
+
+    // Start polling
+    poll();
+  }
+
+  /**
+   * Process a single update from polling
+   */
+  private processUpdate(update: any): Message | null {
+    try {
+      if (!update.message && !update.callback_query) return null;
+
+      let chatId: string | undefined;
+      let sender: string | undefined;
+      let content: string = '';
+      let messageId: string | undefined;
+
+      if (update.message) {
+        const msg = update.message;
+        messageId = msg.message_id?.toString();
+        chatId = msg.chat?.id?.toString();
+        sender = msg.from?.id?.toString() || msg.from?.username;
+        content = msg.text || msg.caption || '';
+      } else if (update.callback_query) {
+        const callback = update.callback_query;
+        messageId = callback.message?.message_id?.toString();
+        chatId = callback.message?.chat?.id?.toString();
+        sender = callback.from?.id?.toString() || callback.from?.username;
+        content = callback.data || '';
+      }
+
+      if (!chatId) return null;
+
+      const message: Message = {
+        id: messageId || this.generateId(),
+        platform: this.type,
+        sender: sender || 'unknown',
+        content: content,
+        timestamp: (update.message?.date || update.callback_query?.message?.date || Date.now()) * 1000,
+        conversationId: chatId,
+        metadata: update,
+      };
+
+      return message;
+    } catch (error) {
+      console.error(`[Telegram] Failed to process update:`, error);
+    }
+    return null;
+  }
+
+  /**
+   * Stop polling
+   */
   async stop(): Promise<void> {
     this.running = false;
+
+    // If in polling mode, also stop the polling loop
+    if (this.mode === 'polling' && this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+
     console.log(`[Telegram] Adapter stopped`);
   }
 

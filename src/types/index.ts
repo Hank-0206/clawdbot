@@ -18,6 +18,7 @@ export interface AgentConfig {
   provider?: AIProviderType;
   apiKey?: string;
   baseUrl?: string;
+  groupId?: string;  // For MiniMax
   maxTokens?: number;
   temperature?: number;
 }

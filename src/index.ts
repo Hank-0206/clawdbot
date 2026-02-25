@@ -9,6 +9,9 @@ async function main() {
   await configManager.load();
 
   switch (command) {
+    case 'start':
+      await import('./commands/start.js').then(m => m.runStart());
+      break;
     case 'gateway':
       await import('./commands/gateway.js').then(m => m.runGateway());
       break;
@@ -47,6 +50,7 @@ function showHelp() {
 用法: copy-clawd <命令>
 
 命令:
+  start        启动 Bot (推荐 - 使用 Long Polling)
   gateway      启动网关服务器 (WebSocket)
   webhook      启动 webhook 服务器 (HTTP)
   agent        与 AI 对话
@@ -58,10 +62,14 @@ function showHelp() {
 
 示例:
   copy-clawd onboard                 # 首次配置
+  copy-clawd start                   # 启动 Bot (推荐)
   copy-clawd webhook --port 3000    # 启动 webhook 服务器
-  copy-clawd gateway --port 18789   # 启动网关服务器
   copy-clawd agent --message "你好"  # 测试 AI 对话
   copy-clawd pairing approve JFY4PLJ6
+
+启动选项:
+  copy-clawd start                  # 使用 Long Polling 启动 (无需公网)
+  copy-clawd start --enable-tools   # 启用工具命令
 
 工具命令 (仅 owner 可用):
   !<命令>        执行 shell 命令

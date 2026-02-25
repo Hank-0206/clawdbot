@@ -75,7 +75,10 @@ export class Bot {
     return undefined;
   }
 
-  private async handleMessage(message: Message): Promise<void> {
+  /**
+   * Handle incoming message - public method for external adapters
+   */
+  async handleMessage(message: Message): Promise<void> {
     console.log(`[${message.platform}] Received message from ${message.sender}: ${message.content}`);
 
     // Check if pairing is required

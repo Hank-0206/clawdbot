@@ -78,13 +78,19 @@ export async function runOnboard() {
       provider = await promptChoice('Select AI provider:', [
         { value: 'anthropic', label: 'Anthropic Claude' },
         { value: 'openai', label: 'OpenAI' },
+        { value: 'openrouter', label: 'OpenRouter (Recommended for China)' },
+        { value: 'opencode', label: 'OpenCode' },
+        { value: 'minimax', label: 'MiniMax' },
         { value: 'azure-openai', label: 'Azure OpenAI' },
       ]);
     }
   } else {
     provider = await promptChoice('Select AI provider:', [
-      { value: 'anthropic', label: 'Anthropic Claude (Recommended)' },
+      { value: 'anthropic', label: 'Anthropic Claude' },
       { value: 'openai', label: 'OpenAI' },
+      { value: 'openrouter', label: 'OpenRouter (Recommended for China)' },
+      { value: 'opencode', label: 'OpenCode' },
+      { value: 'minimax', label: 'MiniMax' },
       { value: 'azure-openai', label: 'Azure OpenAI' },
     ]);
   }
@@ -139,6 +145,18 @@ export async function runOnboard() {
   } else if (provider === 'azure-openai') {
     apiKey = await promptInput('Enter Azure API Key:', '');
     baseUrl = await promptInput('Enter Azure Endpoint (e.g., https://xxx.openai.azure.com):', '');
+  } else if (provider === 'minimax') {
+    const envKey = process.env.MINIMAX_API_KEY;
+    if (envKey) {
+      const useEnv = await promptConfirm('Use MINIMAX_API_KEY from environment?');
+      if (!useEnv) {
+        apiKey = await promptInput('Enter MiniMax API Key:', '');
+      }
+    } else {
+      apiKey = await promptInput('Enter MiniMax API Key:', '');
+    }
+    // Ask for GroupId for MiniMax
+    baseUrl = await promptInput('Enter MiniMax GroupId:', '');
   }
 
   // Step 4: Advanced AI Settings
@@ -283,9 +301,11 @@ export async function runOnboard() {
   console.log(`  Platforms:    ${platforms.length > 0 ? platforms.map(p => p.type).join(', ') : 'None'}`);
 
   console.log('\nNext steps:');
-  console.log('  1. copy-clawd gateway --port 18789    # Start the bot');
-  console.log('  2. Set up webhooks for your platforms');
-  console.log('  3. Enjoy your AI assistant!');
+  console.log('  1. copy-clawd start              # Start the bot (Recommended)');
+  console.log('     or');
+  console.log('  2. copy-clawd gateway --port 18789    # Start with WebSocket');
+  console.log('  3. For polling mode: No webhook setup needed!');
+  console.log('  4. Enjoy your AI assistant!');
 
   console.log('\nFor help: copy-clawd help\n');
 }
@@ -303,6 +323,13 @@ async function configurePlatform(platformType: string): Promise<any> {
     case 'telegram':
       const tgToken = await promptInput('Bot Token (from @BotFather):', '');
       config.config.botToken = tgToken;
+
+      // Ask for connection mode
+      const mode = await promptChoice('Connection mode:', [
+        { value: 'polling', label: 'Long Polling (Recommended - no public URL needed)' },
+        { value: 'webhook', label: 'Webhook (requires public URL)' },
+      ]);
+      config.config.mode = mode;
       break;
 
     case 'dingtalk':

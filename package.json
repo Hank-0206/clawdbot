@@ -14,7 +14,8 @@
     "gateway": "tsx src/commands/gateway.ts",
     "agent": "tsx src/commands/agent.ts",
     "message": "tsx src/commands/message.ts",
-    "onboard": "tsx src/commands/onboard.ts"
+    "onboard": "tsx src/commands/onboard.ts",
+    "start:dev": "tsx src/commands/start.ts"
   },
   "keywords": [
     "ai",

@@ -174,15 +174,17 @@ export class MiniMaxProvider implements AIProvider {
   type: AIProviderType = 'minimax';
   private apiKey: string;
   private baseUrl: string;
+  private groupId: string;
 
   constructor(config: AgentConfig) {
     this.apiKey = config.apiKey || process.env.MINIMAX_API_KEY || '';
     this.baseUrl = config.baseUrl || process.env.MINIMAX_BASE_URL || 'https://api.minimax.chat/v1';
+    this.groupId = config.groupId || process.env.MINIMAX_GROUP_ID || '';
   }
 
   async chat(messages: AIMessage[], options: Record<string, any> = {}): Promise<AIResponse> {
     const model = options.model || 'MiniMax-M2.5';
-    const groupId = options.groupId || process.env.MINIMAX_GROUP_ID || '';
+    const groupId = options.groupId || this.groupId;
 
     // Convert messages to MiniMax format
     const mmMessages = messages.map(m => ({

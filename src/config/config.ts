@@ -83,6 +83,7 @@ export class ConfigManager {
     const config: Partial<Config> = {};
     const lines = content.split('\n');
     let currentSection: string | null = null;
+    let currentPlatform: any = null;
     let currentObj: any = {};
 
     for (const line of lines) {
@@ -94,7 +95,19 @@ export class ConfigManager {
         currentObj = {};
       } else if (trimmed === 'platforms:') {
         currentSection = 'platforms';
-        currentObj = [];
+        config.platforms = [];
+      } else if (trimmed.startsWith('- type:')) {
+        // New platform entry
+        currentPlatform = {
+          type: trimmed.replace('- type:', '').trim() as PlatformType,
+          enabled: true,
+          config: {},
+        };
+        config.platforms?.push(currentPlatform);
+      } else if (trimmed.startsWith('enabled:')) {
+        if (currentPlatform) {
+          currentPlatform.enabled = trimmed.replace('enabled:', '').trim() === 'true';
+        }
       } else if (trimmed.startsWith('model:')) {
         currentObj.model = trimmed.replace('model:', '').trim().replace(/['"]/g, '');
       } else if (trimmed.startsWith('provider:')) {
@@ -103,6 +116,12 @@ export class ConfigManager {
         currentObj.apiKey = trimmed.replace(/apiKey:|api_key:/, '').trim().replace(/['"]/g, '');
       } else if (trimmed.startsWith('baseUrl:') || trimmed.startsWith('base_url:')) {
         currentObj.baseUrl = trimmed.replace(/baseUrl:|base_url:/, '').trim().replace(/['"]/g, '');
+      } else if (currentPlatform && trimmed.includes(':')) {
+        // Parse platform config fields (botToken, mode, etc.)
+        const colonIndex = trimmed.indexOf(':');
+        const key = trimmed.substring(0, colonIndex).trim();
+        const value = trimmed.substring(colonIndex + 1).trim().replace(/['"]/g, '');
+        currentPlatform.config[key] = value;
       }
 
       if (currentSection === 'agent' && Object.keys(currentObj).length > 0) {
@@ -135,6 +154,13 @@ export class ConfigManager {
       for (const platform of config.platforms) {
         lines.push(`  - type: ${platform.type}`);
         lines.push(`    enabled: ${platform.enabled}`);
+        if (platform.config) {
+          for (const [key, value] of Object.entries(platform.config)) {
+            if (value !== undefined && value !== '') {
+              lines.push(`    ${key}: "${value}"`);
+            }
+          }
+        }
       }
     }
 
