@@ -1,0 +1,45 @@
+{
+  "name": "copy-clawd-bot",
+  "version": "1.0.0",
+  "description": "A personal AI assistant that connects to messaging platforms - Chinese version supporting WeChat, DingTalk, Feishu, etc.",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "copy-clawd": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "gateway": "tsx src/commands/gateway.ts",
+    "agent": "tsx src/commands/agent.ts",
+    "message": "tsx src/commands/message.ts",
+    "onboard": "tsx src/commands/onboard.ts"
+  },
+  "keywords": [
+    "ai",
+    "bot",
+    "chat",
+    "wechat",
+    "dingtalk",
+    "feishu",
+    "claude",
+    "openai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "openai": "^4.77.0",
+    "ws": "^8.19.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
