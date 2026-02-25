@@ -1,35 +1,50 @@
 import fs from 'fs';
 import path from 'path';
 import { configManager } from '../config/config.js';
-import { PlatformType, AIProviderType } from '../types/index.js';
+import { AIProviderType } from '../types/index.js';
 
 const CONFIG_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '.', '.copy-clawd');
 const ENV_FILE = path.join(CONFIG_DIR, '.env');
 
 const AI_MODELS = {
   anthropic: [
-    { value: 'claude-opus-4-6', label: 'Claude Opus 4.6 (Best)' },
-    { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (Recommended)' },
+    { value: 'claude-opus-4-6', label: 'Claude Opus 4.6 (最强)' },
+    { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 (推荐)' },
     { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' },
-    { value: 'claude-haiku-3-5', label: 'Claude Haiku 3.5 (Fast)' },
+    { value: 'claude-haiku-3-5', label: 'Claude Haiku 3.5 (最快)' },
   ],
   openai: [
-    { value: 'gpt-4o', label: 'GPT-4o (Best)' },
-    { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Fast)' },
+    { value: 'gpt-4o', label: 'GPT-4o (最强)' },
+    { value: 'gpt-4o-mini', label: 'GPT-4o Mini (最快)' },
     { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (Fast)' },
+    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (最快)' },
   ],
   'azure-openai': [
     { value: 'gpt-4', label: 'GPT-4' },
     { value: 'gpt-35-turbo', label: 'GPT-3.5 Turbo' },
+  ],
+  openrouter: [
+    { value: 'anthropic/claude-3.5-sonnet', label: 'Claude 3.5 Sonnet' },
+    { value: 'anthropic/claude-3-opus', label: 'Claude 3 Opus' },
+    { value: 'anthropic/claude-3-haiku', label: 'Claude 3 Haiku' },
+    { value: 'openai/gpt-4o', label: 'GPT-4o' },
+    { value: 'openai/gpt-4-turbo', label: 'GPT-4 Turbo' },
+    { value: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5' },
+  ],
+  opencode: [
+    { value: 'opencode/gpt-4o', label: 'OpenCode GPT-4o' },
+    { value: 'opencode/gpt-4o-mini', label: 'OpenCode GPT-4o Mini' },
+  ],
+  minimax: [
+    { value: 'MiniMax-M2.5', label: 'MiniMax M2.5' },
   ],
 };
 
 export async function runOnboard() {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║           Welcome to Copy-Clawd Bot Setup!                 ║
-║        Your Personal AI Assistant Configuration             ║
+║           欢迎使用 Copy-Clawd Bot 配置向导!              ║
+║              个人 AI 助手配置                            ║
 ╚════════════════════════════════════════════════════════════╝
 `);
 
@@ -45,7 +60,7 @@ export async function runOnboard() {
   const isUpgrade = existingConfig.agent?.model;
 
   if (isUpgrade) {
-    console.log('Found existing configuration. This will update your settings.\n');
+    console.log('发现已有配置，这将更新你的设置。\n');
   }
 
   // ========== Step 1: AI Provider ==========

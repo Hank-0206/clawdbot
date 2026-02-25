@@ -2,7 +2,7 @@
 export type PlatformType = 'wechat' | 'wechat-work' | 'dingtalk' | 'feishu' | 'slack' | 'discord' | 'telegram';
 
 // AI Provider types
-export type AIProviderType = 'openai' | 'anthropic' | 'azure-openai' | 'anthropic-api';
+export type AIProviderType = 'openai' | 'anthropic' | 'azure-openai' | 'anthropic-api' | 'openrouter' | 'opencode' | 'minimax';
 
 export interface Config {
   agent: AgentConfig;

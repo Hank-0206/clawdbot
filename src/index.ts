@@ -41,40 +41,40 @@ async function main() {
 function showHelp() {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║              Copy-Clawd Bot - Personal AI Assistant          ║
+║              Copy-Clawd Bot - 个人 AI 助手                  ║
 ╚════════════════════════════════════════════════════════════╝
 
-Usage: copy-clawd <command>
+用法: copy-clawd <命令>
 
-Commands:
-  gateway      Start the gateway server (WebSocket)
-  webhook      Start webhook server (HTTP)
-  agent        Talk to the AI agent
-  message      Send a message via platform
-  onboard      Set up the bot for the first time
-  config       Manage configuration
-  pairing      Manage user pairing/approval
-  help         Show this help message
+命令:
+  gateway      启动网关服务器 (WebSocket)
+  webhook      启动 webhook 服务器 (HTTP)
+  agent        与 AI 对话
+  message      通过平台发送消息
+  onboard      首次配置向导
+  config       管理配置
+  pairing      管理用户配对/授权
+  help         显示帮助信息
 
-Examples:
-  copy-clawd onboard                 # First time setup
-  copy-clawd webhook --port 3000     # Start webhook server
-  copy-clawd gateway --port 18789     # Start gateway server
-  copy-clawd agent --message "Hello"  # Test AI chat
+示例:
+  copy-clawd onboard                 # 首次配置
+  copy-clawd webhook --port 3000    # 启动 webhook 服务器
+  copy-clawd gateway --port 18789   # 启动网关服务器
+  copy-clawd agent --message "你好"  # 测试 AI 对话
   copy-clawd pairing approve JFY4PLJ6
 
-Tool Commands (owner only):
-  !<command>        Execute shell command
-  !ls               List directory
-  !pwd              Show current directory
-  !sysinfo          Show system info
+工具命令 (仅 owner 可用):
+  !<命令>        执行 shell 命令
+  !ls           列出目录
+  !pwd          显示当前路径
+  !sysinfo      显示系统信息
 
-Environment Variables:
-  ANTHROPIC_API_KEY      API key for Anthropic Claude
-  OPENAI_API_KEY         API key for OpenAI
-  TELEGRAM_BOT_TOKEN     Telegram bot token
+环境变量:
+  ANTHROPIC_API_KEY      Anthropic Claude API 密钥
+  OPENAI_API_KEY         OpenAI API 密钥
+  TELEGRAM_BOT_TOKEN     Telegram Bot Token
 
-For more information, visit: https://github.com/your-repo/copy-clawd-bot
+更多信息: https://github.com/Hank-0206/clawdbot
 `);
 }
 
