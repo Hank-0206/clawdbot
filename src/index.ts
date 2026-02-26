@@ -5,7 +5,6 @@ const args = process.argv.slice(2);
 const command = args[0];
 
 async function main() {
-  // Load config first
   await configManager.load();
 
   switch (command) {
@@ -43,46 +42,49 @@ async function main() {
 
 function showHelp() {
   console.log(`
-╔════════════════════════════════════════════════════════════╗
-║              Copy-Clawd Bot - 个人 AI 助手                  ║
-╚════════════════════════════════════════════════════════════╝
+Copy-Clawd Bot - Local AI Assistant with Telegram
 
-用法: copy-clawd <命令>
+Usage: copy-clawd <command>
 
-命令:
-  start        启动 Bot (推荐 - 使用 Long Polling)
-  gateway      启动网关服务器 (WebSocket)
-  webhook      启动 webhook 服务器 (HTTP)
-  agent        与 AI 对话
-  message      通过平台发送消息
-  onboard      首次配置向导
-  config       管理配置
-  pairing      管理用户配对/授权
-  help         显示帮助信息
+Commands:
+  start        Start the bot (recommended - uses Long Polling)
+  gateway      Start WebSocket gateway server
+  webhook      Start webhook HTTP server
+  agent        Chat directly with AI in terminal
+  message      Send a message via platform
+  onboard      Interactive setup wizard
+  config       Manage configuration
+  pairing      Manage user pairing/authorization
+  help         Show this help
 
-示例:
-  copy-clawd onboard                 # 首次配置
-  copy-clawd start                   # 启动 Bot (推荐)
-  copy-clawd webhook --port 3000    # 启动 webhook 服务器
-  copy-clawd agent --message "你好"  # 测试 AI 对话
-  copy-clawd pairing approve JFY4PLJ6
+Quick Start:
+  1. Set environment variables:
+     export TELEGRAM_BOT_TOKEN=your_bot_token
+     export ANTHROPIC_API_KEY=your_api_key
 
-启动选项:
-  copy-clawd start                  # 使用 Long Polling 启动 (无需公网)
-  copy-clawd start --enable-tools   # 启用工具命令
+  2. Start the bot:
+     copy-clawd start --enable-tools
 
-工具命令 (仅 owner 可用):
-  !<命令>        执行 shell 命令
-  !ls           列出目录
-  !pwd          显示当前路径
-  !sysinfo      显示系统信息
+  Or run the setup wizard:
+     copy-clawd onboard
 
-环境变量:
-  ANTHROPIC_API_KEY      Anthropic Claude API 密钥
-  OPENAI_API_KEY         OpenAI API 密钥
+Start Options:
+  --enable-tools    Enable AI-driven local machine tools
+  --no-tools        Disable tools
+  --mode polling    Use Long Polling (default, no public URL needed)
+  --mode webhook    Use webhook mode (requires public URL)
+
+Bot Commands (in Telegram):
+  /reset    Clear conversation history
+  /status   Show bot status
+  /tools    List available tools
+  pair      Request access
+
+Environment Variables:
+  ANTHROPIC_API_KEY      Anthropic Claude API key
+  OPENAI_API_KEY         OpenAI API key
   TELEGRAM_BOT_TOKEN     Telegram Bot Token
-
-更多信息: https://github.com/Hank-0206/clawdbot
+  BOT_OWNER_ID           Owner's Telegram user ID
 `);
 }
 

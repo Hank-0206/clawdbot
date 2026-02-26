@@ -1,4 +1,4 @@
-import { PlatformAdapter, Message, PlatformType } from '../types/index.js';
+import { PlatformAdapter, Message, PlatformType, SendMessageOptions } from '../types/index.js';
 
 // Base class for all platform adapters
 export abstract class BasePlatformAdapter implements PlatformAdapter {
@@ -9,7 +9,7 @@ export abstract class BasePlatformAdapter implements PlatformAdapter {
   protected running = false;
 
   abstract initialize(config: Record<string, any>): Promise<void>;
-  abstract sendMessage(to: string, content: string): Promise<void>;
+  abstract sendMessage(to: string, content: string, options?: SendMessageOptions): Promise<void>;
   abstract start(): Promise<void>;
   abstract stop(): Promise<void>;
 
